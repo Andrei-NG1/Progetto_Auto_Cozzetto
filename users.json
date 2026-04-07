@@ -1,0 +1,37 @@
+[
+    {
+        "email": "admin@gmail.com",
+        "password": "pbkdf2_sha256$210000$315c8f18e5473d6e4fd63805a7e7b64a$5ec2947c00f55083f26f044750b724e4e02389873de0271e95670c2e5a94e15d",
+        "role": "admin"
+    },
+    {
+        "email": "fff@gmail.com",
+        "password": "pbkdf2_sha256$210000$fb6d071aafe7def5ddeae20b1e6eccfe$9965ed6113c7e4b25f814eb80c191504811d952ae476d471b138e6a228e2d8b9",
+        "role": "user"
+    },
+    {
+        "email": "tt@gmail.com",
+        "password": "pbkdf2_sha256$210000$2e1e107e563d2cede19729be9ae2adb4$9c1d37d070761d0df920b6efd420d66767476120cf380ed6e65354b89de65730",
+        "role": "user"
+    },
+    {
+        "email": "gg@gmail.com",
+        "password": "pbkdf2_sha256$210000$534c231273c4eeefb9db714c66b40428$b77b16fe1e07d8988f327b29b30e70c5e555e8dceb6ce25d4bec6f1fee7fbf15",
+        "role": "admin"
+    },
+    {
+        "email": "prova@gmail.com",
+        "password": "pbkdf2_sha256$210000$a154fc80182bea3c231a26c108e9a4b5$a7d006a01473c845bc3d2cd60b44c9bbc36936c99f89de2665de8298c89401f8",
+        "role": "admin"
+    },
+    {
+        "email": "pr@gmail.com",
+        "password": "pbkdf2_sha256$210000$95bd4d206c19d420e857ae098a3acaab$8c7233db01ef70f43f4a3ccfd7cdf58484bb1d68930e02371eea76190e4c9be3",
+        "role": "admin"
+    },
+    {
+        "email": "rr",
+        "password": "pbkdf2_sha256$210000$5d25edae1b49d3a43f12deda3704d0b3$50ac47bdd8891ce4e8f6d079d79144056ad5e81009467bcd18b74dd333fb8048",
+        "role": "admin"
+    }
+]

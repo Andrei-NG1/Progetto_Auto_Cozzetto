@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dettaglio Annuncio - AutoScout Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 font-sans">
+
+    <header class="bg-yellow-400 p-4 shadow-sm">
+        <div class="max-w-6xl mx-auto">
+            <a href="index.html" class="text-blue-900 font-bold hover:underline">← Torna alla ricerca</a>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto py-6 px-4">
+        <div class="flex justify-between items-end mb-6">
+            <div>
+                <h1 id="car-title" class="text-3xl font-extrabold text-gray-900 tracking-tight">Caricamento...</h1>
+                <p id="car-version" class="text-lg text-gray-600">Modello e allestimento</p>
+            </div>
+            <div class="text-right">
+                <p id="car-price" class="text-4xl font-black text-blue-600">€ --.--</p>
+                <span class="text-green-600 font-bold">Super prezzo</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <div class="lg:col-span-2 space-y-8">
+
+                <div id="gallery" class="grid grid-cols-2 gap-2 rounded-xl overflow-hidden shadow-lg">
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h2 class="text-xl font-bold mb-6 border-b pb-2">Dati principali</h2>
+                    <div id="specs-grid" class="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="sticky top-6 space-y-4">
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="font-bold text-lg mb-4 text-center">Contatta il venditore</h3>
+                        <form id="contact-form" class="space-y-4">
+                            <input type="text" placeholder="Nome"
+                                class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <input type="email" placeholder="Email"
+                                class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <textarea id="msg-text" rows="4"
+                                class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">Sono interessato a questa Peugeot 208. Vorrei maggiori informazioni.</textarea>
+                            <button type="submit"
+                                class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl">
+                                Invia Messaggio
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-blue-800 font-bold uppercase">Chiama ora</p>
+                            <p id="seller-phone" class="font-bold text-lg">+39 035 123456</p>
+                        </div>
+                        <button class="bg-white p-2 rounded-full shadow-sm">📞</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Prendiamo l'ID dall'URL (es: dettaglio.html?id=1)
+            const urlParams = new URLSearchParams(window.location.search);
+            const carId = urlParams.get('id') || 1; // Default a 1 per test
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/listings/${carId}`);
+                const car = await response.json();
+
+                // 2. Popoliamo i testi
+                document.getElementById('car-title').innerText = `${car.brand_name} ${car.model_name}`;
+                document.getElementById('car-price').innerText = `€ ${car.price.toLocaleString()}`;
+
+                // 3. Render Gallery (Lazy Loading)
+                const gallery = document.getElementById('gallery');
+                gallery.innerHTML = car.images.map((img, i) => `
+                    <div class="${i === 0 ? 'col-span-2' : 'col-span-1'}">
+                        <img src="${img}" loading="lazy" class="w-full h-full object-cover hover:opacity-90 transition cursor-pointer">
+                    </div>
+                `).join('');
+
+                // 4. Scheda Tecnica
+                const specs = [
+                    { label: "Chilometraggio", value: `${car.mileage.toLocaleString()} km` },
+                    { label: "Anno", value: car.registration_date },
+                    { label: "Carburante", value: car.fuel_type },
+                    { label: "Potenza", value: `${car.power_kw} kW (102 CV)` },
+                    { label: "Carrozzeria", value: car.body_type },
+                    { label: "Trasmissione", value: "Manuale" }
+                ];
+
+                document.getElementById('specs-grid').innerHTML = specs.map(s => `
+                    <div>
+                        <p class="text-gray-400 uppercase text-xs font-bold tracking-widest">${s.label}</p>
+                        <p class="text-gray-900 font-bold text-base">${s.value}</p>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error("Errore nel caricamento:", err);
+            }
+        });
+
+        // Gestione form
+        document.getElementById('contact-form').onsubmit = async (e) => {
+            e.preventDefault();
+            alert("Simulazione: Messaggio inviato con successo al venditore!");
+        };
+    </script>
+</body>
+
+</html>

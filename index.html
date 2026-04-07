@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoScout24 Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>.modal-open { overflow: hidden; }</style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-900">
+
+    <header class="bg-yellow-400 p-4 shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black text-blue-900 italic tracking-tighter">AutoScout24</h1>
+            <div class="flex items-center gap-2">
+                <div id="results-count" class="text-sm font-bold bg-white px-3 py-1 rounded-full shadow-sm">In attesa...</div>
+                <button id="register-btn" onclick="openAuthModal('register')" class="bg-white px-3 py-2 rounded-lg text-sm font-bold text-blue-700 border border-blue-300 hover:bg-blue-50">Registrati</button>
+                <button id="login-btn" onclick="openAuthModal('login')" class="bg-blue-700 px-3 py-2 rounded-lg text-sm font-bold text-white hover:bg-blue-800">Accedi</button>
+                <span id="user-badge" class="hidden text-xs font-bold bg-white px-3 py-2 rounded-lg border border-gray-300"></span>
+                <button id="logout-btn" onclick="logout()" class="hidden bg-gray-900 px-3 py-2 rounded-lg text-sm font-bold text-white hover:bg-black">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-8 px-4 flex flex-col md:flex-row gap-8">
+        <aside class="w-full md:w-1/4">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 sticky top-24">
+                <h2 class="font-bold mb-4 border-b pb-2 uppercase text-xs tracking-widest text-gray-400">Filtra</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Prezzo Max (€)</label>
+                        <input type="number" id="filter-price" class="w-full mt-1 border border-gray-200 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500" placeholder="10000 €">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Carburante</label>
+                        <select id="filter-fuel" class="w-full mt-1 border border-gray-200 rounded-lg p-2 outline-none">
+                            <option value="">Tutti</option>
+                            <option value="Benzina">Benzina</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Elettrica/Benzina">Ibrida</option>
+                            <option value="Elettrica">Elettrica</option>
+                        </select>
+                    </div>
+                    <button onclick="applyFilters()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Applica</button>
+                </div>
+            </div>
+        </aside>
+
+        <section class="w-full md:w-3/4">
+            <div id="admin-panel" class="hidden bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+                <h2 class="text-lg font-black text-gray-900 mb-4">Gestione Veicoli (Admin)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input id="car-brand" class="border border-gray-200 rounded-lg p-2" placeholder="Marca (es. Audi)">
+                    <input id="car-model" class="border border-gray-200 rounded-lg p-2" placeholder="Modello (es. A3 Sportback)">
+                    <input id="car-price" type="number" class="border border-gray-200 rounded-lg p-2" placeholder="Prezzo">
+                    <input id="car-mileage" type="number" class="border border-gray-200 rounded-lg p-2" placeholder="Km">
+                    <input id="car-fuel" class="border border-gray-200 rounded-lg p-2" placeholder="Carburante">
+                    <input id="car-date" class="border border-gray-200 rounded-lg p-2" placeholder="Immatricolazione (MM/YYYY)">
+                    <input id="car-power" type="number" class="border border-gray-200 rounded-lg p-2" placeholder="Potenza kW">
+                    <input id="car-image" class="border border-gray-200 rounded-lg p-2" placeholder="URL immagine">
+                </div>
+                <textarea id="car-description" class="w-full mt-3 border border-gray-200 rounded-lg p-2" rows="3" placeholder="Descrizione"></textarea>
+                <div class="mt-3 flex gap-2">
+                    <button onclick="saveVehicle()" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Salva Veicolo</button>
+                    <button onclick="resetAdminForm()" class="bg-gray-200 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">Nuovo</button>
+                </div>
+                <p id="admin-edit-info" class="text-xs text-gray-500 mt-2">Modalita inserimento.</p>
+            </div>
+            <div id="car-grid" class="grid grid-cols-1 gap-6"></div>
+            <div id="pagination" class="flex justify-center gap-2 mt-10 pb-20"></div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 text-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="font-black text-white mb-2">Chi Siamo</h3>
+                <p class="text-sm text-gray-300">AutoScout24 Clone e un portale demo dedicato alla vendita di auto usate e servizi di consulenza per acquisto e finanziamento.</p>
+            </div>
+            <div>
+                <h3 class="font-black text-white mb-2">Contatti</h3>
+                <p class="text-sm">Telefono: +39 02 9876543</p>
+                <p class="text-sm">Email: info@autoscout24-clone.it</p>
+                <p class="text-sm">Sede: Via Roma 77, Milano</p>
+            </div>
+            <div>
+                <h3 class="font-black text-white mb-2">Servizi</h3>
+                <p class="text-sm">Valutazione usato</p>
+                <p class="text-sm">Finanziamento personalizzato</p>
+                <p class="text-sm">Estensione garanzia</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="car-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-black text-3xl font-light">&times;</button>
+            <div id="modal-content" class="p-8"></div>
+        </div>
+    </div>
+
+    <div id="auth-modal" class="fixed inset-0 bg-black/70 hidden z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-500 text-2xl">&times;</button>
+            <h3 id="auth-title" class="text-2xl font-black mb-4">Accedi</h3>
+            <div class="space-y-3">
+                <input id="auth-email" type="email" class="w-full border border-gray-200 rounded-lg p-3" placeholder="Email">
+                <input id="auth-password" type="password" class="w-full border border-gray-200 rounded-lg p-3" placeholder="Password">
+                <div id="register-role-wrap" class="hidden">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Ruolo</label>
+                    <select id="auth-role" class="w-full border border-gray-200 rounded-lg p-3">
+                        <option value="user">Utente</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button onclick="submitAuth()" id="auth-submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">Accedi</button>
+                <p id="auth-message" class="text-sm text-center text-gray-600"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="contact-modal" class="fixed inset-0 bg-black/70 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <div class="text-3xl mb-4 font-black text-blue-700">CONTATTO</div>
+            <h3 id="contact-name" class="text-xl font-bold mb-4"></h3>
+            <p id="contact-body" class="text-gray-600 mb-6"></p>
+            <button onclick="closeContact()" class="w-full bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-black">Chiudi</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let authMode = 'login';
+        let token = localStorage.getItem('authToken') || '';
+        let currentUser = null;
+        let editingVehicleId = null;
+
+        function authHeaders() {
+            return token ? { 'Authorization': `Bearer ${token}` } : {};
+        }
+
+        async function initAuth() {
+            if (!token) {
+                updateAuthUi();
+                return;
+            }
+            try {
+                const res = await fetch('/api/me', { headers: authHeaders() });
+                if (!res.ok) throw new Error('sessione non valida');
+                currentUser = await res.json();
+            } catch (e) {
+                token = '';
+                currentUser = null;
+                localStorage.removeItem('authToken');
+            }
+            updateAuthUi();
+        }
+
+        function updateAuthUi() {
+            const logged = !!currentUser;
+            document.getElementById('register-btn').classList.toggle('hidden', logged);
+            document.getElementById('login-btn').classList.toggle('hidden', logged);
+            document.getElementById('logout-btn').classList.toggle('hidden', !logged);
+            document.getElementById('user-badge').classList.toggle('hidden', !logged);
+
+            const adminPanel = document.getElementById('admin-panel');
+            if (logged) {
+                document.getElementById('user-badge').innerText = `${currentUser.email} (${currentUser.role})`;
+            }
+            adminPanel.classList.toggle('hidden', !(logged && currentUser.role === 'admin'));
+        }
+
+        function openAuthModal(mode) {
+            authMode = mode;
+            document.getElementById('auth-title').innerText = mode === 'register' ? 'Registrati' : 'Accedi';
+            document.getElementById('auth-submit').innerText = mode === 'register' ? 'Registrati' : 'Accedi';
+            document.getElementById('register-role-wrap').classList.toggle('hidden', mode !== 'register');
+            document.getElementById('auth-message').innerText = '';
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        async function submitAuth() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const role = document.getElementById('auth-role').value;
+            const msg = document.getElementById('auth-message');
+
+            if (!email || !password) {
+                msg.innerText = 'Compila email e password.';
+                return;
+            }
+
+            try {
+                if (authMode === 'register') {
+                    const reg = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password, role })
+                    });
+                    const data = await reg.json();
+                    if (!reg.ok) throw new Error(data.detail || 'Errore registrazione');
+                    msg.innerText = 'Registrazione completata. Ora effettua l\'accesso.';
+                    authMode = 'login';
+                    document.getElementById('auth-title').innerText = 'Accedi';
+                    document.getElementById('auth-submit').innerText = 'Accedi';
+                    document.getElementById('register-role-wrap').classList.add('hidden');
+                    return;
+                }
+
+                const login = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await login.json();
+                if (!login.ok) throw new Error(data.detail || 'Credenziali non valide');
+                token = data.token;
+                currentUser = data.user;
+                localStorage.setItem('authToken', token);
+                updateAuthUi();
+                closeAuthModal();
+                fetchCars();
+            } catch (e) {
+                msg.innerText = e.message;
+            }
+        }
+
+        function logout() {
+            token = '';
+            currentUser = null;
+            editingVehicleId = null;
+            localStorage.removeItem('authToken');
+            updateAuthUi();
+            resetAdminForm();
+            fetchCars();
+        }
+
+        async function fetchCars() {
+            const price = document.getElementById('filter-price').value;
+            const fuel = document.getElementById('filter-fuel').value;
+            const params = new URLSearchParams({ page: currentPage, size: 5 });
+            if (price) params.append('max_price', price);
+            if (fuel) params.append('fuel', fuel);
+
+            try {
+                const response = await fetch(`/api/listings?${params}`);
+                const data = await response.json();
+                document.getElementById('results-count').innerText = `${data.total} risultati`;
+                renderCars(data.items);
+                renderPagination(data.total_pages);
+            } catch (e) {
+                document.getElementById('car-grid').innerHTML = 'Errore di connessione.';
+            }
+        }
+
+        function renderCars(cars) {
+            const grid = document.getElementById('car-grid');
+            if (cars.length === 0) {
+                grid.innerHTML = '<div class="bg-white p-10 rounded-xl text-center shadow-sm">Nessuna auto trovata.</div>';
+                return;
+            }
+            grid.innerHTML = cars.map(car => `
+                <div onclick="openModal(${car.id})" class="cursor-pointer bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col md:flex-row hover:shadow-md transition-all">
+                    <img src="${car.main_image || 'https://via.placeholder.com/400x300'}" class="w-full md:w-72 h-52 object-cover">
+                    <div class="p-6 flex-grow flex flex-col justify-between">
+                        <div class="flex justify-between">
+                            <div>
+                                <h3 class="text-xl font-bold">${car.brand_name} ${car.model_name}</h3>
+                                <p class="text-gray-400 text-sm">${car.registration_date} • ${car.mileage.toLocaleString()} km</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-black text-blue-600">€ ${car.price.toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex gap-2">
+                            <span class="bg-gray-100 text-xs font-bold px-2 py-1 rounded">${car.fuel_type}</span>
+                            <span class="bg-gray-100 text-xs font-bold px-2 py-1 rounded">${car.power_kw} kW</span>
+                        </div>
+                        ${(currentUser && currentUser.role === 'admin') ? `
+                        <div class="mt-4 flex gap-2">
+                            <button onclick="event.stopPropagation(); editVehicle(${car.id})" class="bg-amber-500 text-white text-xs font-bold px-3 py-2 rounded-lg">Modifica</button>
+                            <button onclick="event.stopPropagation(); deleteVehicle(${car.id})" class="bg-red-600 text-white text-xs font-bold px-3 py-2 rounded-lg">Cancella</button>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function openModal(id) {
+            const res = await fetch(`/api/listings/${id}`);
+            const car = await res.json();
+            document.getElementById('modal-content').innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <img src="${car.images[0]}" class="rounded-xl w-full h-72 object-cover shadow-lg">
+                    <div class="space-y-4">
+                        <h2 class="text-3xl font-bold">${car.brand_name} ${car.model_name}</h2>
+                        <p class="text-3xl font-black text-blue-600">€ ${car.price.toLocaleString()}</p>
+                        <div class="bg-gray-50 p-4 rounded-xl grid grid-cols-2 gap-2 text-sm">
+                            <p><strong>Km:</strong> ${car.mileage.toLocaleString()}</p>
+                            <p><strong>Alim:</strong> ${car.fuel_type}</p>
+                            <p><strong>Potenza:</strong> ${car.power_kw} kW</p>
+                        </div>
+                        <p class="text-gray-600 text-sm">${car.description || ''}</p>
+                        ${currentUser
+                            ? `<button onclick="showContact(${car.id}, '${car.brand_name} ${car.model_name}')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-100">CONTATTA VENDITORE</button>`
+                            : `<button onclick="openAuthModal('login')" class="w-full bg-gray-700 text-white font-bold py-4 rounded-xl">ACCEDI PER CONTATTARE</button>`
+                        }
+                    </div>
+                </div>
+            `;
+            document.getElementById('car-modal').classList.remove('hidden');
+            document.body.classList.add('modal-open');
+        }
+
+        async function showContact(id, name) {
+            try {
+                const res = await fetch(`/api/listings/${id}/contact`, {
+                    method: 'POST',
+                    headers: authHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Accesso richiesto');
+                document.getElementById('contact-name').innerText = name;
+                document.getElementById('contact-body').innerHTML = `Chiama ora il venditore:<br><span class="text-2xl font-black text-blue-600">${data.seller.phone}</span><br><span class="text-sm">${data.seller.email}</span>`;
+                document.getElementById('contact-modal').classList.remove('hidden');
+            } catch (e) {
+                alert(e.message);
+                if (!currentUser) openAuthModal('login');
+            }
+        }
+
+        function closeContact() { document.getElementById('contact-modal').classList.add('hidden'); }
+        function closeModal() { 
+            document.getElementById('car-modal').classList.add('hidden'); 
+            document.body.classList.remove('modal-open');
+        }
+
+        function getAdminFormData() {
+            return {
+                brand_name: document.getElementById('car-brand').value.trim(),
+                model_name: document.getElementById('car-model').value.trim(),
+                price: Number(document.getElementById('car-price').value),
+                mileage: Number(document.getElementById('car-mileage').value),
+                fuel_type: document.getElementById('car-fuel').value.trim(),
+                registration_date: document.getElementById('car-date').value.trim(),
+                power_kw: Number(document.getElementById('car-power').value),
+                image_url: document.getElementById('car-image').value.trim(),
+                description: document.getElementById('car-description').value.trim()
+            };
+        }
+
+        function fillAdminForm(data) {
+            document.getElementById('car-brand').value = data.brand_name || '';
+            document.getElementById('car-model').value = data.model_name || '';
+            document.getElementById('car-price').value = data.price || '';
+            document.getElementById('car-mileage').value = data.mileage || '';
+            document.getElementById('car-fuel').value = data.fuel_type || '';
+            document.getElementById('car-date').value = data.registration_date || '';
+            document.getElementById('car-power').value = data.power_kw || '';
+            document.getElementById('car-image').value = data.image_url || '';
+            document.getElementById('car-description').value = data.description || '';
+        }
+
+        function resetAdminForm() {
+            editingVehicleId = null;
+            fillAdminForm({});
+            document.getElementById('admin-edit-info').innerText = 'Modalita inserimento.';
+        }
+
+        async function editVehicle(id) {
+            try {
+                const res = await fetch(`/api/listings/${id}`);
+                const car = await res.json();
+                editingVehicleId = id;
+                fillAdminForm({
+                    brand_name: car.brand_name,
+                    model_name: car.model_name,
+                    price: car.price,
+                    mileage: car.mileage,
+                    fuel_type: car.fuel_type,
+                    registration_date: car.registration_date,
+                    power_kw: car.power_kw,
+                    image_url: (car.images && car.images[0]) ? car.images[0] : '',
+                    description: car.description
+                });
+                document.getElementById('admin-edit-info').innerText = `Modifica annuncio ID ${id}`;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (e) {
+                alert('Impossibile caricare il veicolo da modificare.');
+            }
+        }
+
+        async function saveVehicle() {
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert('Solo admin puo gestire i veicoli.');
+                return;
+            }
+            const payload = getAdminFormData();
+            if (!payload.brand_name || !payload.model_name || !payload.fuel_type || !payload.registration_date || !payload.image_url) {
+                alert('Compila tutti i campi principali.');
+                return;
+            }
+            if (!payload.price || !payload.mileage || !payload.power_kw) {
+                alert('Prezzo, km e kW devono essere numeri validi.');
+                return;
+            }
+
+            try {
+                const wasEditing = !!editingVehicleId;
+                const url = editingVehicleId ? `/api/listings/${editingVehicleId}` : '/api/listings';
+                const method = editingVehicleId ? 'PUT' : 'POST';
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Operazione non riuscita');
+                resetAdminForm();
+                fetchCars();
+                alert(wasEditing ? 'Veicolo aggiornato.' : 'Veicolo inserito.');
+            } catch (e) {
+                alert(e.message);
+            }
+        }
+
+        async function deleteVehicle(id) {
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert('Solo admin puo eliminare veicoli.');
+                return;
+            }
+            if (!confirm('Confermi eliminazione del veicolo?')) return;
+            try {
+                const res = await fetch(`/api/listings/${id}`, {
+                    method: 'DELETE',
+                    headers: authHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Eliminazione non riuscita');
+                if (editingVehicleId === id) resetAdminForm();
+                fetchCars();
+            } catch (e) {
+                alert(e.message);
+            }
+        }
+
+        function renderPagination(tp) {
+            const c = document.getElementById('pagination');
+            c.innerHTML = '';
+            if (tp <= 1) return;
+            for (let i = 1; i <= tp; i++) {
+                const act = i === currentPage ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-blue-600 border border-blue-600';
+                c.innerHTML += `<button onclick="changePage(${i})" class="w-10 h-10 rounded-lg font-bold transition ${act}">${i}</button>`;
+            }
+        }
+        function changePage(p) { currentPage = p; fetchCars(); window.scrollTo({top:0, behavior:'smooth'}); }
+        function applyFilters() { currentPage = 1; fetchCars(); }
+
+        (async function bootstrap() {
+            await initAuth();
+            fetchCars();
+        })();
+    </script>
+</body>
+</html>
